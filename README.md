@@ -46,6 +46,7 @@ docker-cli-setup --help
 - Interactive installation process
 - Automatic removal of old Docker packages
 - Installs Docker Engine, CLI, Containerd, Buildx, and Compose plugin
+- Installs shell completion (bash/zsh) for tab completion support
 - Adds your user to the docker group
 - Enables and starts Docker service
 - Verifies installation with hello-world test
@@ -59,6 +60,7 @@ docker-cli-setup --help
 - **Containerd** (`containerd.io`)
 - **Docker Buildx plugin** (`docker-buildx-plugin`)
 - **Docker Compose plugin** (`docker-compose-plugin`)
+- **Shell completion** (bash/zsh) - enables tab completion for Docker commands
 
 ## Requirements
 
@@ -83,9 +85,11 @@ This tool is optimized for **Ubuntu/Debian** systems. It will warn you if you're
 2. Installs prerequisites (ca-certificates, curl)
 3. Adds Docker's official GPG key and APT repository
 4. Installs Docker Engine, CLI, Containerd, Buildx, and Compose plugin
-5. Adds your user to the `docker` group
-6. Enables and starts the Docker service
-7. Runs `docker run hello-world` to verify the install
+5. Installs shell completion (bash/zsh) for tab completion
+6. Adds your user to the `docker` group
+7. Enables and starts the Docker service
+8. Runs `docker run hello-world` to verify the install
+9. Offers to apply docker group membership immediately
 
 ## Uninstall
 

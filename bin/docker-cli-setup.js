@@ -132,6 +132,7 @@ async function main() {
   log('  • Containerd', 'info');
   log('  • Docker Buildx plugin', 'info');
   log('  • Docker Compose plugin', 'info');
+  log('  • Shell completion (bash/zsh) for tab completion', 'info');
   log('  • Your user will be added to the docker group\n', 'info');
   
   const { confirm } = await inquirer.prompt([
@@ -238,17 +239,152 @@ async function main() {
     );
     success('✓ Docker installation verified');
     
-    // Final message
-    log('\n=== Installation Complete! ===', 'success');
-    log('\nInstalled packages:', 'info');
-    log('  • docker-ce (Docker Engine)', 'success');
-    log('  • docker-ce-cli (Docker CLI)', 'success');
-    log('  • containerd.io', 'success');
-    log('  • docker-buildx-plugin', 'success');
-    log('  • docker-compose-plugin', 'success');
-    log('\nImportant:', 'warning');
-    log('  Log out and back in (or run: newgrp docker) so \'docker\' works without sudo.', 'warning');
-    log('  After logging back in, you can use Docker commands without sudo.', 'info');
+    // Step 8: Install shell completion (bash/zsh)
+    log('\n=== Step 8: Installing shell completion ===', 'info');
+    
+    const shell = process.env.SHELL || '/bin/bash';
+    const shellName = shell.split('/').pop();
+    
+    if (shellName === 'bash' || shellName === 'zsh') {
+      const { installCompletion } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'installCompletion',
+          message: `Install Docker CLI completion for ${shellName}? (enables tab completion)`,
+          default: true,
+        },
+      ]);
+      
+      if (installCompletion) {
+        try {
+          // Download Docker completion script
+          const completionUrl = shellName === 'bash' 
+            ? 'https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker'
+            : 'https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/zsh/_docker';
+          
+          const completionDir = shellName === 'bash' 
+            ? '/etc/bash_completion.d'
+            : '/usr/local/share/zsh/site-functions';
+          
+          // Create directory if it doesn't exist
+          await executeCommand(
+            `sudo mkdir -p ${completionDir}`,
+            `Creating ${completionDir} directory...`
+          );
+          
+          // Download and install completion script
+          const completionFile = shellName === 'bash'
+            ? '/etc/bash_completion.d/docker'
+            : '/usr/local/share/zsh/site-functions/_docker';
+          
+          await executeCommand(
+            `curl -fsSL ${completionUrl} | sudo tee ${completionFile} > /dev/null`,
+            `Downloading Docker ${shellName} completion script...`
+          );
+          
+          // For bash, also source it in user's .bashrc if not already there
+          if (shellName === 'bash') {
+            const bashrcPath = `${os.homedir()}/.bashrc`;
+            const bashrcContent = require('fs').existsSync(bashrcPath) 
+              ? require('fs').readFileSync(bashrcPath, 'utf8')
+              : '';
+            
+            if (!bashrcContent.includes('docker completion') && !bashrcContent.includes('/etc/bash_completion.d/docker')) {
+              const { addToBashrc } = await inquirer.prompt([
+                {
+                  type: 'confirm',
+                  name: 'addToBashrc',
+                  message: 'Add Docker completion to your ~/.bashrc? (recommended)',
+                  default: true,
+                },
+              ]);
+              
+              if (addToBashrc) {
+                const completionLine = '\n# Docker CLI completion\n[ -f /etc/bash_completion.d/docker ] && source /etc/bash_completion.d/docker\n';
+                require('fs').appendFileSync(bashrcPath, completionLine, 'utf8');
+                success('✓ Docker completion added to ~/.bashrc');
+              }
+            }
+          }
+          
+          success(`✓ Docker ${shellName} completion installed`);
+          log(`  Tab completion will be available after restarting your terminal or running: source ${completionFile}`, 'info');
+        } catch (err) {
+          log(`Warning: Could not install ${shellName} completion: ${err.message}`, 'warning');
+          log('  You can install it manually later from:', 'info');
+          log(`  ${shellName === 'bash' ? 'https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker' : 'https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/zsh/_docker'}`, 'info');
+        }
+      }
+    } else {
+      log(`Shell completion not configured for ${shellName}. Supported shells: bash, zsh`, 'info');
+    }
+    
+    // Step 9: Test Docker without sudo and offer group application
+    log('\n=== Step 9: Testing Docker without sudo ===', 'info');
+    
+    // Test if docker works without sudo (it won't work yet in this session)
+    try {
+      execSync('docker --version', { stdio: 'ignore' });
+      success('✓ Docker works without sudo!');
+    } catch (err) {
+      log('Docker requires sudo in this session (group change not yet applied).', 'warning');
+    }
+    
+    log('\nYour user has been added to the docker group.', 'info');
+    log('To use Docker without sudo, you need to apply the group change.', 'info');
+    
+    const { applyGroup } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'applyGroup',
+        message: 'How would you like to apply the docker group membership?',
+        choices: [
+          { name: 'Run "newgrp docker" now (starts new shell session)', value: 'newgrp' },
+          { name: 'I will log out and back in later', value: 'later' },
+          { name: 'I will open a new terminal', value: 'newterm' },
+        ],
+        default: 'newgrp',
+      },
+    ]);
+    
+    if (applyGroup === 'newgrp') {
+      log('\n=== Installation Complete! ===', 'success');
+      log('\nInstalled packages:', 'info');
+      log('  • docker-ce (Docker Engine)', 'success');
+      log('  • docker-ce-cli (Docker CLI)', 'success');
+      log('  • containerd.io', 'success');
+      log('  • docker-buildx-plugin', 'success');
+      log('  • docker-compose-plugin', 'success');
+      log('\nStarting new shell session with docker group...', 'info');
+      log('You can now run Docker commands without sudo in this new session.', 'success');
+      log('\nNote: To use Docker without sudo in other terminals, log out and back in.', 'info');
+      
+      // Execute newgrp docker which will start a new shell
+      // Note: This will replace the current process
+      log('\nExecuting: newgrp docker', 'info');
+      require('child_process').spawnSync('newgrp', ['docker'], {
+        stdio: 'inherit',
+        shell: true,
+      });
+    } else {
+      // Final message
+      log('\n=== Installation Complete! ===', 'success');
+      log('\nInstalled packages:', 'info');
+      log('  • docker-ce (Docker Engine)', 'success');
+      log('  • docker-ce-cli (Docker CLI)', 'success');
+      log('  • containerd.io', 'success');
+      log('  • docker-buildx-plugin', 'success');
+      log('  • docker-compose-plugin', 'success');
+      log('\nTo use Docker without sudo:', 'warning');
+      if (applyGroup === 'later') {
+        log('  • Log out and back in to apply the docker group membership', 'info');
+      } else {
+        log('  • Open a new terminal session', 'info');
+      }
+      log('  • Or run: newgrp docker', 'info');
+      log('\nAfter applying the group change, you can run Docker commands without sudo.', 'info');
+      log('Test it with: docker --version', 'info');
+    }
     
   } catch (err) {
     error(`\nInstallation failed: ${err.message}`);

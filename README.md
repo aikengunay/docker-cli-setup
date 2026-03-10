@@ -6,6 +6,10 @@ A CLI tool for installing Docker Engine + CLI on Ubuntu with an interactive setu
 
 ### From npm (Recommended)
 
+```bash
+npm install -g docker-cli-setup
+```
+
 **Linux users (one-time setup):**
 
 If you get permission errors, configure npm once:
@@ -17,21 +21,11 @@ echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-Then install normally:
-
-```bash
-npm install -g docker-cli-setup
-```
-
-**macOS/Windows users:**
-
-Install directly:
-
-```bash
-npm install -g docker-cli-setup
-```
+After this one-time setup, you can use `npm install -g` for any package without sudo or permission issues.
 
 ### From source
+
+For development or to install from source:
 
 ```bash
 git clone https://github.com/aikengunay/docker-cli-setup.git
@@ -40,8 +34,6 @@ npm install -g .
 ```
 
 The `-g` flag installs the package globally, making `docker-cli-setup` available from any directory in your terminal.
-
-**Note:** After the one-time setup on Linux, you can use `npm install -g` for any package without sudo or permission issues.
 
 ## Usage
 
@@ -76,43 +68,20 @@ docker-cli-setup --help
 - Colored output for better UX
 - Cross-platform detection (Linux/Ubuntu optimized)
 
-## What it installs
-
-- **Docker Engine** (`docker-ce`)
-- **Docker CLI** (`docker-ce-cli`)
-- **Containerd** (`containerd.io`)
-- **Docker Buildx plugin** (`docker-buildx-plugin`)
-- **Docker Compose plugin** (`docker-compose-plugin`)
-- **Shell completion** (bash/zsh) - enables tab completion for Docker commands
-
 ## Requirements
 
-- Node.js
+- Node.js 14 or higher
 - Ubuntu/Debian Linux system
 - sudo privileges
 - Internet connection
 
-## Important Notes
-
-### After Installation
-
-After the installation completes, you need to **log out and back in** (or run `newgrp docker`) so that your user's membership in the `docker` group takes effect. After logging back in, you can use Docker commands without `sudo`.
-
-### Platform Support
+## Platform Support
 
 This tool is optimized for **Ubuntu/Debian** systems. It will warn you if you're running on a different Linux distribution, but you can choose to proceed anyway.
 
-### What it does
+## After Installation
 
-1. Removes any old Docker packages (docker, docker-engine, docker.io, containerd, runc)
-2. Installs prerequisites (ca-certificates, curl)
-3. Adds Docker's official GPG key and APT repository
-4. Installs Docker Engine, CLI, Containerd, Buildx, and Compose plugin
-5. Installs shell completion (bash/zsh) for tab completion
-6. Adds your user to the `docker` group
-7. Enables and starts the Docker service
-8. Runs `docker run hello-world` to verify the install
-9. Offers to apply docker group membership immediately
+After the installation completes, you need to **log out and back in** (or run `newgrp docker`) so that your user's membership in the `docker` group takes effect. After logging back in, you can use Docker commands without `sudo`.
 
 ## Uninstall
 
@@ -120,13 +89,23 @@ This tool is optimized for **Ubuntu/Debian** systems. It will warn you if you're
 npm uninstall -g docker-cli-setup
 ```
 
-Note: This will not remove Docker from your system. To remove Docker:
+**Note:** This will not remove Docker from your system. To remove Docker:
 
 ```bash
 sudo apt remove -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 sudo rm -rf /var/lib/docker
 sudo rm -rf /var/lib/containerd
 ```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 

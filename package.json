@@ -1,6 +1,6 @@
 {
   "name": "docker-cli-setup",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A global npm package to easily install Docker Engine + CLI on Ubuntu",
   "main": "index.js",
   "bin": {

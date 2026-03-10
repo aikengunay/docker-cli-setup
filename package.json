@@ -1,0 +1,35 @@
+{
+  "name": "docker-cli-setup",
+  "version": "1.0.0",
+  "description": "A global npm package to easily install Docker Engine + CLI on Ubuntu",
+  "main": "index.js",
+  "bin": {
+    "docker-cli-setup": "./bin/docker-cli-setup.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "docker",
+    "docker-engine",
+    "docker-cli",
+    "ubuntu",
+    "setup",
+    "cli",
+    "installation"
+  ],
+  "author": "Aiken Gunay",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aikengunay/docker-cli-setup.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aikengunay/docker-cli-setup/issues"
+  },
+  "homepage": "https://github.com/aikengunay/docker-cli-setup#readme",
+  "dependencies": {
+    "inquirer": "^8.2.6",
+    "chalk": "^4.1.2"
+  }
+}
